@@ -1,0 +1,25 @@
+{
+  "name": "FileBuffer",
+  "keywords": "buffer spiffs file",
+  "description": "Circular buffer imlemented using buffer file",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/sovcik/FileBuffer.git"
+  },
+  "authors":
+  [
+    {
+      "name": "Jozef Sovcik",
+      "email": "jozef.sovcik@gmail.com",
+      "maintainer": true
+    }
+  ],
+  "version": "0.9.0",
+  "frameworks": "arduino",
+  "platforms": [
+        "atmelavr", 
+        "espressif32", 
+        "espressif8266"
+  ]
+}

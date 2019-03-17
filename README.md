@@ -43,6 +43,8 @@ b = buff.peek(3);    // get 3rd oldest item. Exception will occur if less than 3
 
 x = buff.getRaw(3, &b);  // load 3rd item from buffer storage to variable b
                          // will return false if 3rd item was inactive (no data)
+                         
+buff.clear();        // remove all items                         
 ```
 
 ### Status

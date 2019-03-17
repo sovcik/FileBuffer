@@ -1,6 +1,6 @@
 {
   "name": "FileBuffer",
-  "keywords": "buffer spiffs file",
+  "keywords": "buffer, spiffs, storage",
   "description": "File based circular buffer library",
   "repository":
   {

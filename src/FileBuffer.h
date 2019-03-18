@@ -100,6 +100,11 @@ class FileBuffer {
     bool getRaw(size_t idx, T* rec);
 
     /**
+     * Is buffer ready?
+     */
+    inline bool isReady(){return _open;};
+
+    /**
      * Returns true if buffer is empty
      */
     inline bool isEmpty(){return (_count == 0);};

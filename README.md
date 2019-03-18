@@ -52,6 +52,7 @@ buff.clear();        // remove all items
 buff.circular         // is buffer circular? newer items overwrite older if capacity is reached
 buff.capacity         // how many items can fit into buffer
 buff.size();          // number of items in buffer
+buff.isReady();       // buffer ready?
 buff.isEmpty();       // empty?
 buff.isFull();        // size() == capacity?
 ```

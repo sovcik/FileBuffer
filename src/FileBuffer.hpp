@@ -49,7 +49,11 @@ bool FileBuffer<T,S>::open(const char* fileName, bool reset, bool circular){
     DEBUG_FB_PRINT("[%s] buffer file open '%s', record size=%u\n", module, fileName, sizeof(T));
 
     // locate buffer head & tail
-    setHeadTail();
+    size_t corruptedAt = setHeadTail();
+    if (corruptedAt){
+        DEBUG_FB_PRINT("[%s] ERROR buffer file corrupted at %u\n", module, corruptedAt);
+        return 0;
+    }
 
     DEBUG_FB_PRINT("[%s] head=%u tail=%u size=%u\n", module, _head, _tail, _count);
     
@@ -63,16 +67,20 @@ void FileBuffer<T,S>::close(){
 }
 
 template<typename T, size_t S>
-void FileBuffer<T,S>::setHeadTail(){
-    T rec;
+size_t FileBuffer<T,S>::setHeadTail(){
+    T* rec = new T();
+    size_t corruptedAt = 0;
     
     FILEBUFFER_IDX_TYPE tidx = 0;   // tail index
     FILEBUFFER_IDX_TYPE ridx = 0;   // record index
+    FILEBUFFER_IDX_TYPE pidx = 0;   // previous record index (used for detecting corruption)
 
     _idx = 0;   // set head index to zero
     _head = 0;  // set buffer head to beggining of the file
     _tail = 0;
     _count = 0;
+    
+    uint8_t falling = 0; // count of falling edges
     
     _file.seek(0,SeekSet);
 
@@ -81,8 +89,17 @@ void FileBuffer<T,S>::setHeadTail(){
 
     while (rbc == frs){  // read while there is anything to read
 
-        rbc = _file.read((uint8_t*)&ridx, FILEBUFFER_IDX_SIZE);
-        rbc += _file.read((uint8_t*)&rec, recordSize);
+        rbc = _file.read((uint8_t*)&ridx, FILEBUFFER_IDX_SIZE);   // read index
+        rbc += _file.read((uint8_t*)rec, recordSize);  // read stored record
+
+        if (pidx > ridx) {
+            falling++;  // count falling edges
+            if (falling > 1) {  // there can be only one falling edge in the whole file
+                corruptedAt = _file.position()-rbc;
+                DEBUG_FB_PRINT("\n[fbuff:setHT] ERROR corrupted file at postion %u\n", corruptedAt);
+                rbc = 0;  // exit while loop
+            }
+        }
 
         if (rbc == frs) {           // if complete record was read succesfully
             DEBUG_FB_PRINT("\n[fbuff:setHT] %u, i=%u", _file.position()-rbc, ridx);
@@ -108,11 +125,18 @@ void FileBuffer<T,S>::setHeadTail(){
                 }
             }
         } 
+
+        pidx = ridx;
     }
 
     DEBUG_FB_PRINT("\n");
 
-    DEBUG_FB_PRINT("[fbuff:setHead] index=%u, head=%u, tail=%u\n", _idx, _head, _tail);
+    delete rec;
+
+    if (!corruptedAt)
+        DEBUG_FB_PRINT("[fbuff:setHead] index=%u, head=%u, tail=%u, count=%u\n", _idx, _head, _tail, _count);
+
+    return corruptedAt;
 
 }
 

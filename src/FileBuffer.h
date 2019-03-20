@@ -143,7 +143,7 @@ class FileBuffer {
     bool _open;         // was 'open' method called?
     File _file;
 
-    void setHeadTail();
+    size_t setHeadTail();
 
 };
 

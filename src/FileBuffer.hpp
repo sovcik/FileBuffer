@@ -12,12 +12,22 @@ bool FileBuffer<T,S>::open(const char* fileName, bool reset, bool circular){
     const char* module = "fbuff:begin";
     #endif
     _circular = circular;
+
+    if (reset){
+        if (!SPIFFS.remove(fileName)){
+            DEBUG_FB_PRINT("[%s] ERROR failed to remove old buffer file '%s', exists=%d, reset=%d\n", module, fileName, SPIFFS.exists(fileName), reset);
+        }
+    }
     
     reset = reset | !SPIFFS.exists(fileName);
 
     _file = SPIFFS.open(fileName, reset?"w+":"r+");
     if (!_file) {
-        DEBUG_FB_PRINT("[%s] failed opening buffer file %s\n", module, fileName);
+        FSInfo fi;
+        DEBUG_FB_PRINT("[%s] failed opening buffer file %s, exists=%d, reset=%d\n", module, fileName, SPIFFS.exists(fileName), reset);
+        if (SPIFFS.info(fi))
+            DEBUG_FB_PRINT("[%s] buffer file info:total bytes=%u used bytes=%u\n", module, fi.totalBytes, fi.usedBytes);
+        
         return 0;
     }
 
@@ -36,12 +46,12 @@ bool FileBuffer<T,S>::open(const char* fileName, bool reset, bool circular){
         clear();
     }
 
-    DEBUG_FB_PRINT("[%s] buffer file ready '%s'\n", module, fileName);
+    DEBUG_FB_PRINT("[%s] buffer file open '%s', record size=%u\n", module, fileName, sizeof(T));
 
     // locate buffer head & tail
     setHeadTail();
 
-    DEBUG_FB_PRINT("[%s] head=%u tail=%u\n", module, _head, _tail);
+    DEBUG_FB_PRINT("[%s] head=%u tail=%u size=%u\n", module, _head, _tail, _count);
     
     return 1;
 }

@@ -1,6 +1,18 @@
 #pragma once
 #include "FileBuffer.h"
-#include "Arduino.h"
+#include <Arduino.h>
+
+//#define DEBUG_FILEBUFFER
+
+#ifdef DEBUG_FILEBUFFER
+#ifdef DEBUG_ESP_PORT
+#define DEBUG_FB_PRINT(...) DEBUG_ESP_PORT.printf( __VA_ARGS__ )
+#else
+#define DEBUG_FB_PRINT(...) os_printf( __VA_ARGS__ )
+#endif
+#else
+#define DEBUG_FB_PRINT(...)
+#endif
 
 template<typename T, size_t S>
 constexpr FileBuffer<T,S>::FileBuffer() {

@@ -1,7 +1,7 @@
 {
   "name": "FileBuffer",
   "keywords": "buffer, spiffs, storage",
-  "description": "File based circular buffer library",
+  "description": "File based circular buffer library. Example: log file",
   "repository":
   {
     "type": "git",
@@ -15,7 +15,7 @@
       "maintainer": true
     }
   ],
-  "version": "1.0.0",
+  "version": "1.0.3",
   "frameworks": "arduino",
   "platforms": [
         "atmelavr", 

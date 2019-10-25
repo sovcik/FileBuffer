@@ -288,13 +288,18 @@ bool FileBuffer<T,S>::getRaw(size_t idx, T* rec){
 
 template<typename T, size_t S>
 void FileBuffer<T,S>::clear(){
+
     if (!_open) abort();
-    
     DEBUG_FB_PRINT("[fbuff:flush] flushing buffer");
     T rec;
+    memset(&rec, 0, recordSize); //introduced by JM, solvi
     FILEBUFFER_IDX_TYPE idx = 0;
 
-    for (uint16_t i=0; i<capacity; i++){
+    DEBUG_FB_PRINT("clear with: capacity: %u, value: %u [%u], record: %u [%u]\n", capacity, idx, FILEBUFFER_IDX_SIZE, ((uint8_t*)&rec)[0], recordSize); // introduced by JM, solvi
+
+    _file.seek(0,SeekSet); // introduced by JM, solvi
+
+    for (uint16_t i=0; i<capacity; i++) {
         _file.write((uint8_t*)&idx, FILEBUFFER_IDX_SIZE);
         _file.write((uint8_t*)&rec, recordSize);
         if (i%10 == 0){

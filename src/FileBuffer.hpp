@@ -14,6 +14,10 @@
 #define DEBUG_FB_PRINT(...)
 #endif
 
+#ifdef ESP32
+#include <SPIFFS.h>
+#endif
+
 template<typename T, size_t S>
 constexpr FileBuffer<T,S>::FileBuffer() {
 }
@@ -35,11 +39,15 @@ bool FileBuffer<T,S>::open(const char* fileName, bool reset, bool circular){
 
     _file = SPIFFS.open(fileName, reset?"w+":"r+");
     if (!_file) {
-        FSInfo fi;
+        
         DEBUG_FB_PRINT("[%s] failed opening buffer file %s, exists=%d, reset=%d\n", module, fileName, SPIFFS.exists(fileName), reset);
+        #ifdef ESP8266
+        FSInfo fi;
         if (SPIFFS.info(fi))
             DEBUG_FB_PRINT("[%s] buffer file info:total bytes=%u used bytes=%u\n", module, fi.totalBytes, fi.usedBytes);
-        
+        #elif defined ESP32
+            DEBUG_FB_PRINT("[%s] buffer file info:total bytes=%u used bytes=%u\n", module, SPIFFS.totalBytes(), SPIFFS.usedBytes());
+        #endif
         return 0;
     }
 

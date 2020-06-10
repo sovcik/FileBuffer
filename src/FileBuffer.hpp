@@ -2,8 +2,6 @@
 #include "FileBuffer.h"
 #include <Arduino.h>
 
-//#define DEBUG_FILEBUFFER
-
 #ifdef DEBUG_FILEBUFFER
 #ifdef DEBUG_ESP_PORT
 #define DEBUG_FB_PRINT(...) DEBUG_ESP_PORT.printf( __VA_ARGS__ )

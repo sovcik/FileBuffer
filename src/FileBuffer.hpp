@@ -313,6 +313,7 @@ void FileBuffer<T,S>::clear(){
         if (i%10 == 0){
             DEBUG_FB_PRINT(".");
         }
+        delay(0); // releasing control to mc
     }
 
     _file.flush();

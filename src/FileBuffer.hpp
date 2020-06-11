@@ -16,12 +16,14 @@
 #include <SPIFFS.h>
 #endif
 
-template<typename T, size_t S>
-constexpr FileBuffer<T,S>::FileBuffer() {
+template<typename T>
+FileBuffer<T>::FileBuffer(uint16_t capacity) {
+    this->_capacity = capacity;
+    maxFileSize = static_cast<uint32_t>((sizeof(T)+FILEBUFFER_IDX_SIZE)*capacity);
 }
 
-template<typename T, size_t S>
-bool FileBuffer<T,S>::open(const char* fileName, bool reset, bool circular){
+template<typename T>
+bool FileBuffer<T>::open(const char* fileName, bool reset, bool circular){
     #ifdef DEBUG_FILEBUFFER
     const char* module = "fbuff:begin";
     #endif
@@ -78,14 +80,14 @@ bool FileBuffer<T,S>::open(const char* fileName, bool reset, bool circular){
     return 1;
 }
 
-template<typename T, size_t S>
-void FileBuffer<T,S>::close(){
+template<typename T>
+void FileBuffer<T>::close(){
     _file.close();
     _open = false;
 }
 
-template<typename T, size_t S>
-size_t FileBuffer<T,S>::setHeadTail(){
+template<typename T>
+size_t FileBuffer<T>::setHeadTail(){
     T* rec = new T();
     size_t corruptedAt = 0;
     
@@ -158,8 +160,8 @@ size_t FileBuffer<T,S>::setHeadTail(){
 
 }
 
-template<typename T, size_t S>
-bool FileBuffer<T,S>::push(T record){
+template<typename T>
+bool FileBuffer<T>::push(T record){
     
     if (!_open || (isFull() && !_circular)) abort();
 
@@ -196,8 +198,8 @@ bool FileBuffer<T,S>::push(T record){
 
 }
 
-template<typename T, size_t S>
-const T FileBuffer<T,S>::pop(){
+template<typename T>
+const T FileBuffer<T>::pop(){
     if (!_open || isEmpty()) abort();
 
     FILEBUFFER_IDX_TYPE ridx = 0;
@@ -254,8 +256,8 @@ void FileBuffer<T,S>::showBuff(){
 }
 #endif
 
-template<typename T, size_t S>
-const T FileBuffer<T,S>::peek(size_t idx){
+template<typename T>
+const T FileBuffer<T>::peek(size_t idx){
     if (!_open || idx >= _count) abort();
     uint32_t pos = _tail;
 
@@ -273,9 +275,9 @@ const T FileBuffer<T,S>::peek(size_t idx){
     return rec;
 }
 
-template<typename T, size_t S>
-bool FileBuffer<T,S>::getRaw(size_t idx, T* rec){
-    if (!_open || idx >= capacity) abort();
+template<typename T>
+bool FileBuffer<T>::getRaw(size_t idx, T* rec){
+    if (!_open || idx >= _capacity) abort();
     uint32_t pos = 0;
 
     for(int i=0; i<idx; i++){
@@ -292,8 +294,8 @@ bool FileBuffer<T,S>::getRaw(size_t idx, T* rec){
     return ii != 0;
 }
 
-template<typename T, size_t S>
-void FileBuffer<T,S>::clear(){
+template<typename T>
+void FileBuffer<T>::clear(){
 
     if (!_open) abort();
     DEBUG_FB_PRINT("[fbuff:flush] flushing buffer");
@@ -305,7 +307,7 @@ void FileBuffer<T,S>::clear(){
 
     _file.seek(0,SeekSet); // introduced by JM, solvi
 
-    for (uint16_t i=0; i<capacity; i++) {
+    for (uint16_t i=0; i<_capacity; i++) {
         _file.write((uint8_t*)&idx, FILEBUFFER_IDX_SIZE);
         _file.write((uint8_t*)&rec, recordSize);
         if (i%10 == 0){

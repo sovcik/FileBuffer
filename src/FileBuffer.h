@@ -32,27 +32,12 @@ SOFTWARE.
 #define FILEBUFFER_IDX_TYPE  uint16_t
 #define FILEBUFFER_IDX_SIZE  2
 
-template <typename T, size_t S> 
+template <typename T> 
 class FileBuffer {
 
     public:
 
-    /** 
-     * Capacity how many records can be stored in the buffer
-     */
-    static constexpr uint16_t capacity = static_cast<uint16_t>(S);
-
-    /**
-     * Size of the buffer record in bytes
-     */
-    static constexpr uint16_t recordSize = static_cast<uint16_t>(sizeof(T));
-
-    /**
-     * Buffer file size in bytes
-     */
-    static constexpr uint32_t maxFileSize = static_cast<uint32_t>((sizeof(T)+FILEBUFFER_IDX_SIZE)*S);
-
-    constexpr FileBuffer();
+    FileBuffer(uint16_t capacity=50);
 
 	/**
 	 * Disables copy constructor
@@ -110,17 +95,19 @@ class FileBuffer {
     /**
      * Returns true if buffer reached its capacity.
      */
-    inline bool isFull(){return (_count == capacity);};
+    inline bool isFull(){return (_count == _capacity);};
 
     /**
      * How many more records can be stored in the buffer
      */
-    inline uint16_t available(){ return capacity-_count;};
+    inline uint16_t available(){ return _capacity-_count;};
 
     /**
      * Count of records available in the buffer
      */
     inline uint16_t size(){return _count;};
+
+    inline uint16_t capacity(){return _capacity;};
     
     /**
      * Removes all records from the buffer
@@ -130,6 +117,22 @@ class FileBuffer {
     #ifdef DEBUG_FILEBUFFER
     void showBuff();
     #endif
+
+    private:
+    /** 
+     * Capacity how many records can be stored in the buffer
+     */
+    uint16_t _capacity;
+
+    /**
+     * Size of the buffer record in bytes
+     */
+    uint16_t recordSize = static_cast<uint16_t>(sizeof(T));
+
+    /**
+     * Buffer file size in bytes
+     */
+    uint32_t maxFileSize;
 
 
     private:
